@@ -10,7 +10,7 @@ if not os.path.isdir(upload_folder):
     os.makedirs(upload_folder)
 
 parser = reqparse.RequestParser()
-parser.add_argument('image',type=werkzeug.datastructures.FileStorage, location='files')
+parser.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
 
 
 class Uploader(Resource):
