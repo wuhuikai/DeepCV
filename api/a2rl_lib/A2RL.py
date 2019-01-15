@@ -5,9 +5,9 @@ import numpy as np
 import tensorflow as tf
 import skimage.io as io
 
-import network
+from . import network
 
-from actions import command2action, generate_bbox, crop_input
+from .actions import command2action, generate_bbox, crop_input
 
 
 global_dtype = tf.float32
