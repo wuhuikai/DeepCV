@@ -1,6 +1,7 @@
 from api.uploader import Uploader
 from api.deep_guided_filter import ImageProcessing
 from api.face_swap import FaceSwap
+from api.auto_crop import AutoCrop
 
 from flask import Flask
 from flask_cors import CORS
@@ -13,6 +14,7 @@ deep_api = Api(app)
 deep_api.add_resource(Uploader, '/upload')
 deep_api.add_resource(ImageProcessing, '/deep_guided_filter/<string:task>')
 deep_api.add_resource(FaceSwap, '/face_swap/<string:task>')
+deep_api.add_resource(AutoCrop, '/auto_crop')
 
 
 if __name__ == '__main__':
