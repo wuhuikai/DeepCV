@@ -5,6 +5,9 @@ from flask_restful import Resource, reqparse
 
 class Blending(Resource):
     parser = reqparse.RequestParser()
+    parser.add_argument('x', type=int, default=0)
+    parser.add_argument('y', type=int, default=0)
+    parser.add_argument('ratio', type=float, default=1.0)
     parser.add_argument('color_weight', type=float, default=1)
     parser.add_argument('src', type=str)
     parser.add_argument('dst', type=str)
