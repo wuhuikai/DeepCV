@@ -25,7 +25,7 @@ sess = tf.Session()
 
 
 def auto_cropping(path):
-    origin_image = [io.imread(path).astype(np.float32) / 255 - 0.5]
+    origin_image = [io.imread(path).astype(np.float32)[:,:,:3] / 255 - 0.5]
 
     terminals = np.zeros(1)
     ratios = np.asarray([[0, 0, 20, 20]])
