@@ -45,7 +45,8 @@ def blending(args):
 
     blended_im = gp_gan(new_obj, bg, new_mask, G, 64, color_weight=args.color_weight)
 
-    path = os.path.join('static/images', '{}.png'.format(uuid.uuid4()))
+    name = '{}.png'.format(uuid.uuid4())
+    path = os.path.join('/tmp/imgs', name)
     imsave(path, blended_im)
 
-    return {'path': path, 'status': 'success'}
+    return {'path': os.path.join('images', name), 'status': 'success'}

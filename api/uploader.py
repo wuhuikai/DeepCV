@@ -5,7 +5,7 @@ import werkzeug
 from flask_restful import Resource, reqparse
 
 
-upload_folder = '/tmp/upload_img'
+upload_folder = '/tmp/imgs'
 if not os.path.isdir(upload_folder):
     os.makedirs(upload_folder)
 

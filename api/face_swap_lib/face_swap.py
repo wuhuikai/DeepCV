@@ -259,7 +259,8 @@ def face_swap(args):
     x, y, w, h = dst_shape
     dst_img[y:y + h, x:x + w] = output
 
-    path = os.path.join('static/images', '{}.png'.format(uuid.uuid4()))
+    name = '{}.png'.format(uuid.uuid4())
+    path = os.path.join('/tmp/imgs', name)
     cv2.imwrite(path, dst_img)
 
-    return {'path': path, 'status': 'success'}
+    return {'path': os.path.join('images', name), 'status': 'success'}

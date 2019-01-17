@@ -8,6 +8,8 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
 
+from flask import send_from_directory
+
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +19,10 @@ deep_api.add_resource(ImageProcessing, '/deep_guided_filter/<string:task>')
 deep_api.add_resource(FaceSwap, '/face_swap/<string:task>')
 deep_api.add_resource(AutoCrop, '/auto_crop')
 deep_api.add_resource(Blending, '/blending')
+
+@app.route('/images/<string:name>')
+def get_image(name):
+    return send_from_directory('/tmp/imgs', name, as_attachment=True)
 
 
 if __name__ == '__main__':
