@@ -19,8 +19,8 @@ serializers.load_npz('models/blending/blending_gan.npz', G)
 """
 def blending(args):
     # load image
-    obj  = img_as_float(imread(args.src))
-    bg   = img_as_float(imread(args.dst))
+    obj  = img_as_float(imread(args.src)[:,:,:3])
+    bg   = img_as_float(imread(args.dst)[:,:,:3])
     mask = img_as_float(imread(args.mask))
     if len(mask.shape) == 3:
         mask = mask[:, :, 0]
