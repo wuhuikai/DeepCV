@@ -115,7 +115,7 @@
                 if (clip_path.length > 0) {
                     context.fillStyle = 'red';
                     clip_path.forEach(function (point) {
-                       context.fillRect(point[0], point[1], 3, 3);
+                       context.fillRect(point[0]*div_img_ratio, point[1]*div_img_ratio, 3, 3);
                     });
 
                     context.strokeStyle = 'green';
@@ -238,7 +238,7 @@
             }
 
             function process() {
-                ip = window.location.href.replace('apps/blending.html', 'images/');
+                ip = window.location.href.replace('apps/blending_mask.html', 'images/');
                 $('#load_output').attr('hidden', false);
                 $('#output').attr('hidden', true);
                 src = $('#path_src').text();
