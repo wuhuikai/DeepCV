@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Deep Guided Filter</title>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.14.1/dist/tf.min.js"></script>
+        <script>
+            var ip = '/';
+
+            $(document).ready(function() {
+                if (window.location.hash === '#dehaze') {
+                    document.getElementById('non_local_dehazing').click();
+                } else {
+                    document.getElementById('auto_ps').click();
+                }
+            });
+
+            var fileReader = new FileReader();
+            var image;
+            fileReader.onload = function(event) {
+                $('#load_input').attr('hidden', false);
+                $('#input').attr('hidden', true);
+                $('#output').attr('hidden', true);
+
+                image = new Image();
+                image.onload = function(){
+                    var canvas = document.createElement("canvas");
+                    var context = canvas.getContext("2d");
+                    var ratio = Math.max(Math.min(image.width, image.height) / 64, Math.max(image.width, image.height) / 1024);
+
+                    canvas.width = image.width/ratio;
+                    canvas.height = image.height/ratio;
+                    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+
+                    var form = document.getElementById('upload');
+                    var formData = new FormData(form);
+                    canvas.toBlob(function(blob) {
+                        formData.set('image', blob);
+                        $.ajax({
+                            url: ip + 'upload',
+                            type: 'put',
+                            data: formData,
+                            processData: false,
+                            contentType: false
+                        }).then(function(data) {
+                            $('#load_input').attr('hidden', true);
+                            $('#path').text(data.data);
+                            $('#input').attr('src', image.src).attr('hidden', false);
+                        });
+                    });
+                };
+                image.src = event.target.result;
+            };
+
+            function upload (input) {
+                if (input.files && input.files[0]) {
+                    fileReader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            function click_m(id) {
+                $('#'+id).parent().addClass('pure-menu-selected').siblings().removeClass('pure-menu-selected');
+                $('#task').text(id);
+                $('#output').attr('hidden', true);
+            }
+
+            function process() {
+                $('#load_output').attr('hidden', false);
+                $('#output').attr('hidden', true);
+
+                task = $('#task').text();
+                path = $('#path').text();
+                $.ajax({
+                    url: ip + 'deep_guided_filter/'+task,
+                    data: {'path': path,
+                           'r': 1, 'eps': 1e-8},
+                    type: 'get'
+                }).then(function(data) {
+                    A = tf.tensor(data.A);
+                    b = tf.tensor(data.b);
+                    var img = tf.fromPixels(image);
+                    ratio = Math.max(1.0, Math.max(image.height, image.width)/1024.0);
+                    height = image.height/ratio;
+                    width = image.width/ratio;
+                    if (ratio > 1) {
+                        img = tf.image.resizeBilinear(img, [height, width]);
+                    }
+                    A = tf.image.resizeBilinear(A, [height, width]);
+                    b = tf.image.resizeBilinear(b, [height, width]);
+                    img = img.div(255).mul(A).add(b).mul(255).clipByValue(0, 255);
+                    img = img.pad([[0, 0], [0, 0], [0, 1]], 255);
+                    img.data().then(function (data) {
+                        var canvas = document.createElement('canvas');
+                        ctx = canvas.getContext('2d');
+                        canvas.width = width;
+                        canvas.height = height;
+                        // create imageData object
+                        var idata = ctx.createImageData(width, height);
+                        // set our buffer as source
+                        idata.data.set(new Uint8ClampedArray(data));
+                        // update canvas with new data
+                        ctx.putImageData(idata, 0, 0);
+                        $('#output').attr('src', canvas.toDataURL()).attr('hidden', false);
+                        $('#load_output').attr('hidden', true);
+                    });
+                });
+            }
+        </script>
+        <style type='text/css'>
+            .gray_box {
+                border-style: solid;
+                border-width: 2px;
+                border-color: gray;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1 align="center">
+            Deep Guided Filter
+        </h1>
+        <div class="pure-menu pure-menu-horizontal" align="center">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item gray_box"><a href="#ps" class="pure-menu-link" onclick="click_m(this.id)" id="auto_ps">Auto PS</a></li>
+                <li class="pure-menu-item gray_box"><a href="#dehaze" class="pure-menu-link" onclick="click_m(this.id)" id="non_local_dehazing">Dehazing</a></li>
+            </ul>
+            <p id="task" hidden></p>
+        </div>
+        <p>
+        <div class="pure-g" align="center">
+            <div class="pure-u-1-2">
+                <form id='upload' method="POST" enctype="multipart/form-data">
+                    <input type="file" id="image" value="" onchange="upload(this)">
+                </form>
+                <p id="path" hidden/>
+            </div>
+            <div class="pure-u-1-2">
+                <button class="pure-button" onclick="process()">Process</button>
+            </div>
+        </div>
+        <p>
+        <div class="pure-g">
+            <div class="pure-u-1-2" align="center">
+                <img src='' id='input' hidden width="90%"/>
+                <img src='load.gif' id='load_input' hidden width="10%"/>
+            </div>
+            <div class="pure-u-1-2" align="center">
+                <img src='' id='output' hidden width="90%"/>
+                <img src='load.gif' id='load_output' hidden width="10%"/>
+            </div>
+        </div>
+    </body>
+</html>
