@@ -151,8 +151,13 @@
                            'x': parseInt($('#x_label').text()), 'y': parseInt($('#y_label').text()),
                            'ratio': parseFloat($('#ratio_label').text())})
                   .then(function(data) {
-                    $('#output').attr('src', 'https://algorithmia.com/v1/data/.algo/wuhuikai/blending/temp/'+data.result.path).attr('hidden', false);
-                    $('#load_output').attr('hidden', true);
+                      Algorithmia.client("sim20ecJ90KOMiXiHtO0gdEp/TW1")
+                          .algo("ANaimi/Base64DataConverter/0.1.2")
+                          .pipe('data://.algo/wuhuikai/blending/temp/'+data.result.path)
+                          .then(function(output) {
+                              $('#output').attr('src', 'data:image/png;base64,'+output.result).attr('hidden', false);
+                              $('#load_output').attr('hidden', true);
+                          });
                 });
             }
 
